@@ -1,0 +1,240 @@
+# 1.一维数组
+## 1.一维数组的访问
+数组名就是数组的首地址
+
+1. 下标访问 a[ i ]
+2. 以指针方式访问数组  * 
+   ( a+i )
+   ```
+   int a[10];
+   a=&a[0];
+   a+1=&a[1];
+   a+i=&a[i];
+   ```
+   a的值是内存分配的直接地址，常指针，a++来移动指针是错误的。
+   正确应该如下
+   ```
+   int a[10]={1,2,3,4,5,6,7,8,9,10},*p;
+
+   for(int i=0;i<10;i++)
+   {cout<<*(a+i)<<'\t';}
+  
+   for(p=a;p<a+10;p++)
+   {cout<<*p<<'\t';}
+
+   //a+i和p++计算的偏移单位是一个整形数据的长度
+   ```
+ # 2.指针数组
+ 类型 * 标识符 [下标表达式 ]
+
+ 指针 都是 四个字节（无论什么类型数据）在32位操作系统下
+
+ 1. 指向基本数据类型的指针数组
+   
+   离散的数据，可以用指针数组来管理他们的地址，通过指针数组进行访问
+   ```
+   int a=11,b=22,c=33;
+   int *p[3];
+   p[0]=&a; p[1]=&b; p[2]=&c;
+   for(int i=0;i<3;i++)
+   {cout<<*p[i]<<" ";}
+   ```
+2. 指向数组的指针数组
+   ```
+   int main()
+   {
+    double aa[2]={1.1,2.2};          //aa是一维数组名，内存直接地址
+    double bb[2]={3.3,4.4};      
+    double cc[2]={5.5,6.6};
+    double (*pf[3])[2];        //逻辑上二级指针
+    pf[0]=&aa;               //aa 是一级指针  pf[0]=&aa才是同级操作
+    pf[1]=&bb;                   //&aa 没有实质意义
+    pf[2]=&cc;
+    for(int i=0;i<3;i++)
+    {
+        for(int j=0;j<2;j++)
+        {
+            cout<<*(*pf[i]+j)<<" ";
+        }
+        cout<<endl;
+    }
+   }
+   ```
+   用指针数组调用函数
+   ```
+   double (*pfun[4])(double);
+   pfun[0]=max;
+   pfun[1]=min;
+
+   for(int i=0;i<4;i++)
+     cout<<(*pfun[i](x))<<endl;
+
+    // *pfun[i](x)  等效于 pfun[i](x);调用函数
+   ```
+# 2.二维数组
+### 1. 二维数组的定义和初始化 
+
+高维数组在内存中以高维优先的方式存放
+
+利用初始化值表，可以省略高维数组中的最高维长度说明，低维不可以
+```
+int a[][3]={1,2,3,4,5,6};       对
+int b[2][]={1,2,3,4,5,6};       错
+```
+## 2.以指针方式访问数组
+```
+int a[2][3];
+
+a=&a[0];        a+1=&a[1];           //二维数组名逻辑上是二维指针
+*a=a[0];
+a[0]=&a[0][0];               //a[i]表示第i行元素的首地址，一级指针
+*a[0]=a[0][0]; 
+```
+```
+二维数组名 a 逻辑上是二维指针
+但是
+int **pp;
+pp=a;   这是错误的
+
+只有定义一个指向一维数组的指针，才可以操作逻辑上为二级指针的二维数组名
+int (*pary)[4];
+pary=a+i;
+```
+```
+int main()
+{
+    int a[3][4]={1,2,3,4,5,6,7,8,9,10,11,12};
+    int i,j,total=0;
+    int *p,(*pary)[4];
+    for(p=a[0];p<a[0]+12;p++)
+         total+=*p;
+    cout<<"total is "<<total<<endl;
+    for(i=0;i<3;i++)
+       for(j=0;j<4;j++)
+       {
+        pary=a+i;
+        cout<<setw(3)<< *(*pary+j);
+       }
+```
+# 3.数组作为函数参数
+1. 数组名作为函数参数
+```
+void fun(int x[],int a){……};
+
+ //这里的x[]实际是指针    int x[]等效于int *x 
+//在fun函数中是允许修改指针x，例如，在函数内可以移动指针 x++ 来访问数组元素，但是数组名ary++就不允许
+
+int ary[3];
+fun(ary,n);
+```
+# 4.动态存储
+new按照指定类型的长度分配存储空间，并返回所分配空间的首地址。
+```
+int *p=new int(5);
+
+int *q=new int[4]; //申请长度为4的动态数组
+
+delete p;
+delete []q;
+p=NULL；q=NULL;
+```
+```
+void App(int *& pa,int len)        //int * & pa;注意是指针引用参数
+{                               
+  pa=new int[len];           //如果是 int *pa;那么函数调用时就只是
+  if(pa==NULL)             //将ary的地址赋给形参pa，在APP函数中pa的
+    {                        // new申请的地址写入pa，与ary无关。
+                         //函数返回后，ary也无法获得动态数组的地址
+      cout<<"allocation faiure.\n";
+      return ;
+    }
+  for(int i=0;i<n;i++)
+     pa[i]=0;
+}
+int main()
+{
+    int *ary=NULL,*t;
+    int i,n;
+    cout<<"n=";
+    cin>>n;
+    APP(ary,n);
+    for(t=ary,t<ary+n;t++)
+       cout<<*t<<" ";
+    cout<<endl;
+    for(int i=0;i<n;i++)
+      ary[i]=10+i;
+    cout<<endl;
+    delete []ary;
+    ary=NULL;
+}
+```
+杨辉三角，记得是从右到左迭代
+```
+#include<iostream>
+using namespace std;
+void yhtriangle(int* const py, int n);
+int main()
+{
+	int* p, n;
+	do
+	{
+		cin >> n;
+	} while (n > 20 || n < 0);
+	p = new int[n + 1];
+	yhtriangle(p, n);
+	delete[]p;
+	p = NULL;
+}
+void yhtriangle(int* const py, int n)
+{
+	py[0] = 1;
+	cout << py[0] << endl;
+	for (int i = 1; i < n + 1; i++)
+	{
+		py[i] = 1;
+		for (int j = i - 1; j > 0; j--)
+		{
+			py[j] = py[j] + py[j - 1];
+		}
+		for (int k = 0; k <= i; k++)
+			cout << py[k] << " ";
+		cout << endl;
+	}
+}
+```
+# 5.C字符串
+字符串存放在字符型数组中，并添加'\0'作为其结束标记
+```
+#include<cstring>
+
+char str1[10]={'s','t','u','d','e','n','t','\0'};
+static char str[10]={'s','t','u','d','e','n','t'};  // 自动补\0
+char *str="student";
+char str2[]="student";
+```
+iostream
+
+1. 字符串常量、字符串数组、字符指针都表示字符串
+2. 输出字符指针就是输出整个字符串
+3. 输出字符指针的间接引用就是输出单个字符
+  ```
+  char *s="hello";
+  for(int i=0;i<5;i++)
+     cout<<*(s+i);
+  cout<<endl;
+  for(int i=0;i<5;i++)
+     cout<<s+i<<endl;
+  ```
+4. strlen(n),计算的时有效字符的个数，空字符不包括在内
+5. 字符串的直接比较就是地址比较
+6. 字符串的赋值就是地址赋值
+   ```
+   char str1[10]="computer",str2[10],*sp;
+   int i=0;
+   while(str1[i])
+    str2[i]=str1[i++];
+   str2[i]='\0';
+   sp=str1;   //正确的赋值
+   ```
+   ~~str2=str1~~;    错误的赋值
+  

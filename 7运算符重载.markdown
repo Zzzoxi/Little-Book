@@ -1,0 +1,275 @@
+# 7.1运算符重载规则
+
+1. 不能重载的运算符：
+   ```
+   .    .*    ::   ?:  sizeof
+   ```
+   C++中不能用友元函数重载的运算符有：
+   ```
+   =  ()   []   ->
+   ```
+   不能改变运算符的优先级、结合性、所需要操作的个数
+
+   模仿数学运算符 矩阵、复数、向量
+
+   默认重载 ：
+   1. 赋值运算符 = 默认重载为对象数据成员的复制
+   2. 地址运算符 & 默认重载为返回任何类对象的地址
+
+# 7.2用成员函数或友元函数重载运算符
+1. |区别|成员函数|友元函数|
+   |----|----|----|
+   |关键|有this指针|无this指针
+   一元运算符|Object op()|operator op(Object)
+   二元运算符|ObjectL op(ObjectR) |  operator op(ObjectL,ObjectR)
+   | |一元运算符的操作数、二元运算符的操作数是该类的一个对象|运算符左右操作数类型不同，二元运算交换性？
+   |运算符操作需要修改类对象状态| 用成员函数 ，如= 、*= 、++ |若用友元函数，使用*引用*参数修改对象
+   运算符操作数有隐式转换（尤其是第一个操作数）|无|用友元函数或普通函数重载
+   注意|使用成员函数重载  =  ()   []   ->|C++中不能用友元函数重载的运算符有： =  ()   []   -> ；但是<< 与 >>只能用友元函数
+2. ## 用成员函数重载运算符
+```
+class TriCoor
+{
+    public:
+       TriCoor (int max=0,int my=0,int mz=0);
+       TriCoor operator+(TriCoor t);
+       TriCoor & operator=(TriCoor t);
+    private:
+       int x,y,z;
+};
+TriCoor TriCoor::operator+(TriCoor t)
+{
+   TriCoor temp;
+   temp.x=this->x+t.x;
+   temp.y=this->y+t.y;
+   temp.z=this->z+t.z;
+   return temp;               // a+b+c  被解释为  (a+b)+c
+}
+TriCoor & TriCoor::operator=(TriCoor t)
+{
+    this->x=t.x;
+    this->y=t.y;
+    this->z=t.z;
+    return *this;       //a=b=c 被解释为 a=(b=c);
+             // 返回类型为类对象，同时是 引用& ,可节省匿名空间
+            //连续运算，使得重载运算符满足原来的语义
+}
+```
+## 3.用友元函数重载运算符
+```
+class Complex
+{
+  public:
+    Complex(double r=0,double i=0);
+    Complex(int a)
+    {
+        Real=a;
+        Image=0;
+    }
+    friend Complex operator+(const Complex &c1,const Complex &c2);
+
+  private:
+     double Real,Image;
+};
+Complex operator+(const Complex &c1,const Complex &c2)
+{
+    double r=c1.Real+c2.Real;
+    double i=c1.Image+c2.Image;
+    return Complex(r,i);    //显式调用构造函数
+}
+
+int main()
+{
+    Complex c1(2.4,3.4),c;
+    c=25+c1;     //将25int类型转变为类类型
+                  //同时重载函数要const &才能使用常数
+}
+```
+运算符操作需要修改类对象状态	用成员函数 ，如= 、*= 、++。	若用友元函数，使用引用参数&修改对象
+```
+TriCoor operator++(TriCoor & op1)
+{
+    op1.x++;
+}
+
+TriCoor ob(1);
+ob++;
+```
+# 7.3几个经典运算符的重载
+## 1. 重载++与--运算符
+```
+class Increase
+{
+   public:
+      Increase();
+      ……
+      //成员函数
+      Increase operator++();                   //++a
+      Increase operator++(int);                //a++
+      //友元函数
+      friend Increase operator++(Increase &);           //++a
+      friend Inrease  operator++(Increase & ,int);      //a++
+  
+};
+//成员函数 ++a
+Increase Increase:: operator++()
+{
+    value++;
+    return *this;
+}
+
+//成员函数a++
+Increase Increase ::operator++(int)
+{
+    Increase temp;
+    temp.value=value++;
+    return temp;
+}
+
+//友元函数++a
+Increase operator++(Increase &a)
+{
+    a.value++;
+    return a;
+}
+
+//友元函数a++
+Increase operator ++ (Increase &a,int)    //int是伪参数
+{
+    Increase temp(a);
+    a.value++;
+    return temp;
+}
+```
+## 2. 重载赋值运算符=
+用于对象数据的复制，只能用于成员函数重载，而且不能被继承
+```
+Name::Name(const Name & obj)         //定义拷贝构造函数
+{
+   cout<<"Copying "<<Obj.pname<<"into its owm block\n";
+   size=obj.size;
+   pname=new char[size+1];
+   if(pname!=0)strcpy_s(pname,size+1,obj.name);
+}
+Name Name:: operator=(Name obj)        //重载赋值运算符
+{
+    delete []pname;      //！！！
+    size=obj.size;
+    pname=new char[size+1];        //要先申请存储空间
+    if(pname!=0)strcpy_s(pname,size+1,obj.name);
+    return *this;
+}
+
+
+int main()
+{
+    Name obj1("ZhangSan");
+    Name obj2=obj1;           //拷贝构造函数用于对象的初始化
+    Name obj3("Noname");
+    obj3=obj2=obj1;          //用于程序运行时修改对象的程序
+}
+```
+## 3.重载[]和()运算符
+```
+int & Vector :: operator[](int i)const
+{
+    if(i>=0 && i<len)return v[i];
+    cout<<"The subscript "<<i<<"is outside.\n";
+    exit(0);
+}
+
+//其中int & operator[](int i)const;
+// 当重载运算符函数调用需要作为左值时，应该返回引用
+//A[i]=i+1;
+
+int Vector::operator()()const
+{
+    return len;
+}
+```
+## 4.重载流插入<<和流提取>>运算符
+cout是C++输出流ostream的预定义对象，用于连接显示器；cin是输入流istream的预定义对象，用于连接键盘,不是Vector类对象。
+
+使用&是为了链式调用
+```
+class Vector
+{
+   friend ostream & operator<<(ostream output ,conse Vector &);
+    friend istream & operator>>(istream input ,conse Vector &);
+};
+
+
+//输出向量
+ostream & operator<<(ostream & output,const Vector & A)
+{
+    for(int i=0;i<A.len;i++)
+        output<<A.v[i]<<" ";
+    return output;       //output 其实是cout的别名，直接写cout也行
+} 
+
+
+//输入向量
+istream & operator>>(istream &input,const Vector &A)
+{
+    for(int i=0;i<A.len;i++)
+       input>>A.v[i];
+    return input;
+}                        //input 其实是cin的别名，直接写cin也行
+```
+
+# 7.4类类型的转换
+可以使用构造函数和类型转换函数，有隐式调用和显式调用
+## 1.使用构造函数
+具有一个非默认参数的构造函数实现从参数类型到该类类型的转换。
+```
+ClassX :: ClassX(arg,agr1=e1,……);
+```
+```
+Complex (int a)
+{
+    Real=a;Image=0;
+}
+
+类型转换 ：
+void funx(Complex);       //函数原型
+Complex x=Complex (3);    //显式把整型3转换为Complex对象
+Complex y=5;              //对5进行类型转换，作为y的初值
+x=12;                     //赋值的类型转换
+funx(27);                 //参数传递的类型转换
+```
+## 2.使用类型转换函数
+具有一个非默认参数的构造函数能够把某种类型对象转换为指定类对象，但不能将一个类对象转换为基本数据类型值。
+
+所以引入类型转换函数 （特殊的成员函数）
+```
+ClassX ::operator Type()
+{
+    //……
+    return Type_Value;
+}
+```
+这个函数功能就是把ClassX类型对象转换为Type类型的对象。类型转换函数没有参数，没有返回类型，但必须有一个返回Type类型值的语句。
+
+类型转换函数只能定义为一个类的成员函数，不能定义为类的友元函数。
+```
+class Calculator
+{
+    public:
+       operator int ()
+       {
+            int a;
+            a=value;
+            return a;
+       }
+       private:
+          int value;
+}
+
+
+int main()
+{
+    Caculator Counter;
+    Counter++;
+    cout<<int(Counter)<<endl;
+}
+```

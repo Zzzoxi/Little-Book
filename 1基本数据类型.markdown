@@ -1,0 +1,178 @@
+# 1.1基本数据类型
+
+### 基础知识
+   1.机器语言，汇编语言，高级语言
+
+   2.实现一个源程序 三步 
+1. 编辑
+ 2. 编译（预处理，编译，连接）#预处理指令
+  3. 运行
+
+3.关键字
+
+array / catch  /extern/ friend /  goto / inline / nullptr / short  /template  / this / throw / try / typedef / typename / union  / virtual 
+
+4.分隔符 便于编译系统识别
+
+1.基本数据类型
+|   标识符 | 字节数 | 范围  |
+|   -----  | ----- | ----  |
+|char  |1 |-128~127|
+|int | 4 |-2 147 483 648 ~ 2 147 483 647 (亿级)|
+|double |8 |               |
+```
+const int MAX=520;  //写在最上面，然后设置数组，便于修改MAX的值
+
+int arr[MAX];
+```
+*浮点数判断范围*
+   
+   不会直接用==，而是用
+   ```
+   #include<cmath>
+
+   fabs(a)<=1e-8 ； 
+   ```
+   减少浮点数精度误差，可以将所有数字×10 或100 ……使其变成整数
+
+   或者是可以接受的误差 如 1e-3
+## 2.标识符：
+
+以字母或下划线开始，由字母、数字和下划线组成的符号串
+
+关键字小心  字母大小写敏感
+（关键字都是小写，所以有一些就直接大写避免和关键字撞）
+Months Count……
+
+
+3.enum 枚举型
+```
+enum colour{red,yellow,blue,white,black};
+//枚举用标识符中的序号表示数据
+int main()
+{
+    colour c; //c是枚举类型数
+    c=red;
+    cout<<"red"<<c<<endl;
+}
+//运行结果 red 0
+//枚举常量的序值可以在初始化修改，但必须是升序的
+enum Months{Jan=1,Feb=2};
+```
+
+4.**进制**
+| 进制   |备注 |示例|直接以该进制输出显示结果|
+| ----  | ---- | ---|---|
+|十进制 |后缀L表示长整数，后缀U表示无符号整数||cout<<dec<<a<<endl;|
+|八进制 | 以0为前缀，只能表示正整数   |023（8）=19（10）|cout<<oct<<a<<endl;
+|十六进制 |以0x 或0X为前缀，只能表示正整数 |0x3b(a~f)      0XFF （ A~F）|cout<<hex<<a<<endl;
+
+## 5.浮点型
+
+（小数）13.89 / .638 /-435. 正确的
+
+（指数表示）尾数和指数不能省略，指数必须是整数
+
+
+12e8 / 314e-5 / .618e3 正确的
+
+e-7 / .e10 / 1e2.5 错误的
+
+## 6.字符型
+
+1. '\ddd'八进制   '\xhh'十六进制
+
+   如 '\101' 和'\x41'都表示'A'；
+
+ 2. '\ +'在字符前添加 \ 输出字符
+
+3. 字符串最后会自动添加空字符'\0'作为串结束符。所以 'x' 和  "x" 的储存形式不同
+
+## 7.指针
+1. 不管指针对象是什么类型，指针都是占4个字节
+2. 
+   |    指针       |          例子     |        |
+   |-------        |------|---|
+   |指向常量的指针 | const int *p |指针的指向可以修改，但是指针指向的值不能修改
+   |指针常量|int * const p=&a|指针的指向不可以修改，指针指向的值能修改
+   |指向常量的常量指针|const int *const p|指针的指向不可以修改，指针指向的值不能修改
+3. 常引用 const int &pa=a;
+
+ ## 8.数据输入与数据输出
+   1. cin>>a>>b; 
+   其中cin是预定义输入流对象，>>在流操作中称为流提取操作符
+
+   （输入中不能出现表达式）
+
+   ios::syns_with_stdio(false)； 关闭流同步，加快cin的读入速度
+
+   scanf();
+
+```
+   #include<iomanip>
+
+   setfill(char c)                  //设置填充符号c
+   setpreicision(int n)              //设置浮点数输出精度
+   setw(int n)                       //设置输出宽度
+
+   输出小数   cout<<fixed<<setprecision(3)<<a<<endl;
+              //有加fixed保留的就是小数点后几位
+              cout<<setprecision(3)<<a<<endl;
+              //保留的就是有效数字，并且会四舍五入
+   填充字符 010   cout<<setw(3)<<setfill('0')<<a<<endl;
+   ```
+   # 9.数学函数
+   #include< cmath >
+   |函数原型|样例|说明|
+   |---|---|--|
+   |double sin(double x)|sin(3.1415)|x弧度制
+   double exp(double x)|exp(1)|e^x
+   double log(double x)|log(10)
+   double pow(double x,double y)|pow(3,2)|x^y
+   double sqrt(double x)|sqrt()
+   double fabs(double x)|fabs(-10)|绝对值
+   double ceil(double x)|ceil(2.1)|向上取整
+   double floor(double x)|floor(2.9)|向下取整
+
+   ## 10.强制类型转换：
+   （把一个整数变成浮点数） 加 . 0 或者* 1 . 0 
+
+   ## 11.四舍五入精确到整数
+
+   （1）  int( ans+0.5 )  //相当于把小数抹掉
+
+   (2) #include< cmath >  round 函数就是四舍五入的
+
+## 12.数字作为字符型输入
+```
+ char c;   //若将数字作为字符型输入，如何转化为整型数字
+ int a;
+ cin>>c;
+ a=c-'0';
+ ```
+
+ ## 13.随机数
+ ```
+ #include<ctime>
+
+int ans;
+ srand(time(0));
+ ans=rand()%100 + 1;
+
+ //   rand()%(b-a+1)+a  产生一个从a到b的随机数
+ ```
+
+
+## 14.质数
+```
+int is_prime=1;
+for(int j=2;j*j<=i;j++)
+{
+   if(i%j==0)
+   {
+      is_prime=0;
+      break;
+   }
+}
+if(is_prime)
+```

@@ -1,0 +1,183 @@
+模板说明：
+```
+template <typename T1,typename T2，……>
+```
+## 1.函数模板
+```
+#include<iostream>
+using namespace std;
+template <typename T>          //模板说明
+T Max(const T a, const T b)     //函数定义（函数参数不仅是类属参数，也可以是一般类型参数）
+{
+	return (a > b ? a:b);            //将模板实例化，编译器生成模板函数
+}
+int main()
+{
+	int a, b;
+	cout << "Input two integer.\n";
+	cin >> a >> b;
+	cout <<"max(" << a << "," << b << ")=" << Max(a, b) << endl;
+	double c, d;
+	cout << "Input two double .\n";
+	cin >> c >> d;
+	cout << "max(" << c << "," << d << ")=" << Max(c, d) << endl;
+	cout << "Input two charater.\n";
+	char e, f;
+	cin >> e >> f;
+	cout << "max(" << e << "," << f << ")=" << Max(e, f) << endl;
+	return 0;
+}
+
+```
+```
+template <typename T>
+void sortBubble(T* arr, int size)
+{
+	int i, work;
+	T temp;
+	for (int pass = 0; pass <= size - 1; pass++)
+	{
+		work = 1;
+		for (int j = 0; j <= size - pass - 1; j++)
+		{
+			if (arr[j] < arr[j + 1])
+			{
+				temp = arr[j];
+				arr[j] = arr[j + 1];
+				arr[j + 1] = temp;
+				work = 0;
+			}
+		}
+		if (work)break;
+	}
+}
+```
+重载函数模板
+## 2.类模板
+类模板由模板说明和类说明构成
+```
+template<typename T>
+class Array
+{                                        //定义类模板
+public:
+	Array(int s);
+	virtual ~Array();
+	virtual const T& Entry(int index)const;
+	virtual void Enter(int index, const T& value);
+protected:
+	int size;
+	T* element;
+};
+template<typename T>Array<T>::Array(int s)             
+{
+	if (s > 1)size = s;
+	else size = 1;
+	element = new T[size];
+}
+template<typename T>Array<T>::~Array()
+{
+	delete[]element;
+}
+
+int main()
+{
+	Array<int>IntAry(5);     //先实例化，建立模板类对象
+
+}
+```
+
+
+## 3.类模板作为函数参数
+函数是函数模板
+```
+template<typename T>
+void Tfun(const Array<T>&x,int index)
+{
+    cout<<x.Enter(index)<<endl;
+}
+
+//要先类模板实例化
+Array <double >DouAry(4);
+Tfun(DouAry,3);
+```
+
+## 4.在类层次中的类模板
+```
+template<typename T>
+class BoundArray:public Array<T>
+{
+public:
+    BoundArray(int low=0,int height=1);
+    //……
+private:
+    ……
+}
+```
+### 从类模板派生模板类
+```
+template<typename T>
+class A:
+{
+public:
+    A T(x){t=x;}
+    void out(){cout<<t<<endl;}
+protected:
+    T t;
+}
+class B:public A<int>           //实例化基类的类属参数，派生模板类
+{
+public:
+    B(int a,double x):A<int>(a);
+    {
+        y=x;
+    }
+    void out()
+    {
+        A<int>::out();
+        cout<<y<<endl;
+    }
+private:
+    double y;
+}
+```
+### 模板类的友元类
+重载运算符的友元函数
+```
+template <typename T>
+class Complex
+{
+    public:
+     template <typename T>
+     friend Complex <T>operator +(const Complex<T>c1,const Complex<T>c2);
+}
+```
+## 5.类模板与静态成员
+
+```
+#include<iostream>
+#include<string>
+using namespace std;
+template<class Nametype,class Agetype>
+class Person
+{
+public:
+	Person(Nametype name, Agetype age)
+	{
+		m_name = name;
+		m_age = age;
+		}
+	void showperson()
+	{
+		cout << "Name:" << m_name << " age:" << m_age << endl;
+	}
+private:
+	Nametype m_name;
+	Agetype m_age;
+};
+int main()
+{
+	Person<string,int>p1("lucy", 19);                                                                  
+	p1.showperson();
+	return 0;
+}
+```

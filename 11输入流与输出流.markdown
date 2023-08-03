@@ -1,0 +1,70 @@
+### 1.流类库
+streambuf和ios类
+
+ios类派生
+1. istream (ifstream文件输入流类，istrstream字符串输入流类，istream_withassign重载赋值运算符的输入流类)
+2. ostream(ofstream文件输出流类,ostrstream串输出流类,ostream_withassign重载运算符输出流类)
+
+ostream有标准输出流cout\cerr(标准错误输出流) 、 clog（标准错误输出流，连接打印机）
+
+### 2.输入流操作
+|函数|功能|示例|
+|---|---|---|
+|read|无格式输入指定字节数|istream read(char *pch,int ncount)
+|get|提取字符，包括空格|1. int get();提取一个字符；    2.get(char *pch,int ncount,char delim='\n');遇到分隔符delim后结束
+|getline|提取一行字符 | getline(char *pch,int ncount,char delim='\n')；    若前有输入cin>>a,要先添加cin.get()后再写cin.getline(……)；
+
+### 3.输出流操作
+|函数|功能|
+|---|---|
+|put ,write|插入一字节
+|seekp|移动输出流指针
+|tellp|返回输出流中指定位置的指针值
+
+#### 4 恢复或设置状态字cin.clear();或者cin.clear(ios::goodbit);
+```
+while(cin>>k)        //按ctrl_z结束输入
+{
+    total+=k;
+}
+cin.clear();           //状态字清零，恢复流状态
+while(cin>>k)
+{
+    total-=k;
+}
+```
+### 3.格式控制
+|标志常量|意义|
+|---|---|
+|ios::left|左对齐
+|ios::right|右对齐
+|ios::showbase|在输出中显示基数指示符
+|ios::showpoint|显示小数点
+|ios::showpos|正数显示+
+|ios::scientific|科学计数法显示浮点数
+|ios::fixed|用定点形式显示浮点数
+
+|函数|功能|
+|---|---|
+|int width(int n)|设置和返回输出宽度 cin.width(10);自动右对齐，输出后将恢复系统默认设置
+|char fill(char c)|设置填充字符
+|int precision(int n)|设置显示精度
+
+cout.setf(ios::oct,ios::basefield);清除基数标志位
+
+可以用 | 同时设置几个标志字体
+### 4.iostream常用的控制符
+```
+cout<< hex<<a;   //十六进制
+cout<<oct<<a<<endl;
+cout<<dec<<a<<endl;
+```
+### 5.iomanip常用的控制符
+|控制符|功能|
+|---|---|
+|resetiosflags(ios::iflags)|清除iflags指定的标志位
+|setiosflags(ios::iflags)|设置iflags指定的标志位
+|setbase(int base)|设置基数|
+|setfill(char c)
+|setprecision(int n)|设置浮点数输出宽度
+|setw(int n)|设置输出宽度，只对后面紧跟着的数据起作用

@@ -1,0 +1,253 @@
+# 1. 位运算
+ ^异或 ~按位取反
+
+ 位运算效率最高
+
+ 按二进制位串形式输出无符号整数的值
+ ```
+ #include<iostream>
+using namespace std;
+void bitDisplay(unsigned value);
+int main()
+{
+	unsigned n;                  //无符号整数 unsigned
+	cin >> n;
+	bitDisplay(n);
+	return 0;
+}
+void bitDisplay(unsigned value)
+{
+	unsigned c;
+	unsigned  bitmask = 1 << 31;              // bitmask掩码
+	cout << value<<"=";
+	for ( c = 1; c <= 32; c++)
+	{
+		cout << (value & bitmask ? 1 : 0);   //注意加括号整个括起来
+		value <<= 1;
+		if (c % 8 == 0)cout << ' ';
+	}
+	cout << endl;
+}
+ ```
+变量a或b进行两次异或运算，不会改变原来的值。
+
+利用异或运算的特点，可以快速进行两个变量值的交换而无需借助第三方辅助变量
+
+```
+#include<iostream>
+using namespace std;
+int main()
+{
+	int a, b;
+	cin >> a >> b;
+	cout << "a=" << a << " b=" << b << endl;
+	a = a ^ b;
+	b = a ^ b;
+	a = a ^ b;
+	cout << "a=" << a << " b=" << b << endl;
+}
+
+```
+位运算要求操作数类型为整型，若要交换浮点型变量的数据，可以用指针方式分段处理数据，可以用于快速处理大量数据。
+```
+#include<iostream>
+using namespace std;
+int main()
+{
+	double a = 123.456, b = 456.789;
+	int* ap, * bp;
+	ap = (int*)(&a);        //  double型变为int型
+	bp = (int*)(&b);
+	cout << "a=" << a << " b=" << b << endl;
+	*ap = (*ap) ^ (*bp); *bp = (*ap) ^ (*bp); *ap = (*ap) ^ (*bp);
+	ap++; bp++;             //前半部分和后半部分
+	*ap = (*ap) ^ (*bp); *bp = (*ap) ^ (*bp); *ap = (*ap) ^ (*bp);
+	cout << "a=" << a << " b=" << b << endl;
+	return 0;
+}
+
+```
+# 2.集合
+```
+集合运算    对应的位运算
+A∪B         A|B
+A∩B          A&B
+差集A-B      A&（~(A&B）)
+A包含于B     A|B==B
+补集~A       ~A
+X属于A       1<<(x-1)&A==1<<(x-1)
+空集A        A==0
+```
+```
+//输入集合元素
+void setput(unsighed &S)
+{
+    unsigned x;
+	cin>>x;
+	while(x)
+	{
+		putX(S,x);
+		cin>>x;
+	}
+}
+//元素x并入集合S中
+unsigned putX(unsigned S,unsigned x)
+{
+	unsigned bitmask=1<<(x-1);
+	S|=bitmask;
+	return S;
+}
+//输出集合S中的全部元素
+void setdisplay(unsigned S)
+{
+	unsigned c;
+	unsigned bitmask=1;           //掩码
+	if(NULL(S))
+	{cout<<"{ }\n";}
+    for(c=1;c<=32;c++)
+	{
+		if(bitmask&S)
+		   cout<<c<<",";
+		bitmask<<=1;
+	}
+	cout<<"\b\b}\n";         //擦除最后的逗号
+
+}
+
+//求并集
+unsigned Com(unsigned A,unsigned  B)
+{
+	return A|B;
+}
+//求交集
+unsigned setInt(unsigned A,unsigned  B)
+{
+	return A&B;
+}
+//求差集
+unsigned setDiff(unsigned A,unsigned  B)
+{
+	return A&(~(A&B));
+}
+//判断包含
+bool Inc(unsigned A,unsigned B)
+{
+	if((A|B==B))return true;
+	else return false;
+}
+//判断属于
+bool In(unsigned S,unsigned x)
+{
+	unsigned bitmask=1;
+	bitmask<<=(x-1);
+	if(bitmask&S)return true;
+	else return false;
+}
+//判断空集
+bool Null(unsigned S)
+{
+	if(S)return false;
+	return true;
+}
+```
+# 结构
+访问结构：
+
+结构变量名.成员      point.x;
+
+*(指针).成员  ( *p).x；
+
+指针->x;  p->x;
+
+pp++偏移的是一个结构的长度
+
+```
+struct weather
+{
+   double wind;
+   double temp;
+}yeaterday;
+int main()
+{
+	weather today;
+	yesterday.wind=3.1;
+	yesterday.temp=10.5;
+	today=yesterday;      //结构变量整体赋值
+	cout<<today.wind<<" "<<today.temp<<endl;
+}
+```
+结构参数
+```
+//传值参数
+void change(point p1,point p2);
+
+//地址参数
+void change(point *pt1,point *pt2);
+
+//引用参数
+void change(point &pr1,point &pr2);
+```
+## 结构数组
+用辅助数组对结构数组中的数据进行关键字排序
+```
+#include<iostream>
+using namespace std;
+struct person
+{
+	char name[10];
+	unsigned int id;
+	double salary;
+};
+void Input(person[], const int);
+void Sort(person* [], const int);
+void Output(person *[], const int);
+int main()
+{
+	person allone[100];
+	person* index[100];              //索引数组
+	int total;
+	for (int i = 0; i < 100; i++)
+		index[i] = allone+i;            //allone + i；是地址 
+	cout << "职工人数是：";
+	cin >> total;
+	cout << "输入职工信息\n";
+	Input(allone, total);
+	cout << "以工资为关键字排序\n";
+	Sort(index, total);
+	Output(index, total);
+	return 0;
+}
+void Input(person a[], const int n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		cout << i << "name：";
+		cin >> a[i].name;
+		cout << "id: ";
+		cin >> a[i].id;
+		cout << " salary :";
+		cin>> a[i].salary;
+	}
+}
+void Sort(person* p[], const int n)
+{
+	person* temp;
+	for (int i = 1; i < n; i++)
+	{
+		for(int j=0;j<=n-1-i;j++)
+			if (p[j]->salary < p[j + 1]->salary)
+			{
+				temp = p[j];
+				p[j] = p[j + 1];
+				p[j + 1] = temp;
+			}
+	}
+}
+void Output(person *p[], const int n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		cout << p[i]->name <<'\t' << p[i]->id <<'\t' << p[i]->salary << endl;
+	}
+}
+```

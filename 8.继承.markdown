@@ -1,0 +1,299 @@
+## 1.基类与派生类
+|访问控制|  ||
+|----|----|----|
+|公有继承|基类的公有成员->派生类的公有成员|基类的保护成员->派生类的保护成员；
+|私有继承|基类的公有和保护成员->派生类的私有成员
+|保护继承|基类的公有和保护成员->派生类的保护成员
+  | |基类的私有成员，在派生类中有存储空间，但不能直接使用，得通过成员函数访问
+  ||protected成员在类体系中 派生类可见，类外不可见
+## 2.重名成员
+在派生类中访问重名成员时，屏蔽基类的同名成员。如果要在派生类中使用基类的同名成员，通过（ 类名：：成员 ）访问。
+## 3.派生类中访问静态成员
+1. 基类定义的静态成员，将被所有派生类共享
+2. 根据静态成员自身的访问特性和派生类的继承方式，在类层次体系中具有不同的访问性质
+3. 在派生类中可以通过类名显示访问 或者对象访问
+```
+ 类名：：成员
+ 对象.成员
+ ```
+## 4.基类的初始化
+派生类对象的初始化（初始式）
+
+派生类构造函数声明为
+```
+派生类构造函数（变元表）：基类（变元表），对象成员（变元表）……对象成员（变元表）；
+```
+初始式 （参数初始化）的初始化：
+1. 类类型成员的初始化
+2. 派生类的初始化
+3. 常成员的初始化
+   
+构造函数执行顺序：基类->对象成员->派生类
+```
+#include<iostream>
+using namespace std;
+class parent_class
+{
+	int data1, data2;
+public:
+	parent_class(int p1, int p2) { data1 = p1; data2 = p2; }
+	int inc1() { return ++data1; }
+	int inc2() { return ++data2; }
+	void display()
+	{
+		cout << "data1=" << data1 << " data2=" << data2 << endl;
+	}
+};
+class derived_class :private parent_class
+{
+	int data3;
+	parent_class data4;
+public:
+	derived_class(int p1, int p2, int p3, int p4, int p5) :
+		parent_class(p1, p2), data4(p4, p5)
+	{
+		data3 = p3;
+	}
+	int  inc1() { return parent_class::inc1(); }
+	int inc3() { return ++data3; }
+	void display()
+	{
+		parent_class::display();
+		data4.display();
+		cout << "data3=" << data3 << endl;
+	}
+
+};
+int main()
+{
+	derived_class d1(17, 18, 3, 5, 6);
+	d1.inc1();
+	d1.display();
+	return 0;
+}
+```
+## 5.多继承
+多继承中，多个基类构造函数执行顺序取决于 *定义派生类时指定的各个继承基类的顺序
+```
+class Derived:public Base1,public Base2
+{
+    ……
+}
+```
+## 6.虚继承 virtual
+使公共基类在派生类中只产生一个对象，必须对这个基类声明为虚继承，使得这个基类称为虚基类
+```
+class B
+{public:int b};
+class B1:virtual public B
+{
+	private:int b1;
+}；
+class B2:virtual public B
+{
+	private:int b2;
+};
+class C:public B1,public B2
+{
+    private int  d;
+}
+
+
+C cc;
+cc.b;   //right
+```
+# 虚函数与多态性
+## 1.类指针的关系
+### 1.用基类指针访问派生类对象
+在main函数中，基类指针A_p获取派生类对象B_obj的地址之后，可以调用基类的成员函数对派生类对象进行访问，但是，不能直接用A_p访问派生类自己定义的成员函数。
+需要通过强制类型转换来演示对派生类自己定义成员函数的调用
+```
+(（B_class*）A_p)->show_phone();
+```
+### 2.用派生类指针访问基类对象 （强制类型转换）
+```
+class Date{};
+class DateTime:public Date{};
+
+DateTime dt(2003,1,1,12,30,0);
+DateTime *pdt=&dt;
+((Date)dt).print();              //对象类型强制转换，把派生类对象强制转换为基类对象
+dt.print();
+((Date*)pdt)->print();    //对象指针类型强制转换，把派生类对象指针强制转换为基类对象指针
+pdt->print();
+```
+## 2.虚函数和动态联编
+以virtual关键字开头的成员函数称为虚函数
+
+虚函数不能是构造函数
+```
+#include<iostream>
+using namespace std;
+class Base
+{
+protected:
+	char x;
+public:
+	Base(char xx) { x = xx; }
+	virtual void who()         //说明虚函数
+	{
+		cout << "Base:" << x << endl;
+	}
+};
+class First_d :public Base
+{
+protected :
+	char y;
+public:
+	First_d(char xx, char yy) :
+		Base(xx) {
+		y = yy;
+	}
+	void who()      //默认说明虚函数
+	{
+		cout << "First_d" << y << endl;
+	}
+};
+class Second_d :public First_d
+{
+protected:
+	char z;
+public:
+	Second_d(char xx, char yy, char zz) :
+		First_d(xx, yy) {
+		z = zz;
+	}
+	void who()         //默认说明虚函数
+	{
+		cout << "Second_d" << z << endl;
+	}
+};
+int main()
+{
+	Base b('A');;
+	Base* p = &b;
+	p->who();
+	First_d f('a', 'b');
+	p = &f;
+	p->who();
+	Second_d s('b', 'c', 'd');
+	p = &s;
+	p->who();
+	return 0;
+}
+```
+虚析构函数
+## 3.纯虚函数和抽象类
+纯虚函数是在基类中说明但没有定义的虚函数，要求所有的派生类都必须提供自己的版本。
+```
+virtual 类型 函数名（参数表）=0；
+```
+
+一个具有纯虚函数的基类称为抽象类。
+1. 抽象类只能用作其他类的基类
+2. 抽象类不能建立对象
+3. 但可以声明抽象类的指针（可以指向其派生类对象）
+4. 抽象类不能作为函数返回类型，参数类型或显示类型转换
+
+```
+#include<iostream>
+using namespace std;
+class Figure
+{
+protected:
+	double x, y;
+public:
+	void set_dim(double i, double j = 0)     //默认值为圆的半径 y=0
+	{
+		x = i; y = j;
+	}
+	virtual void show_area()const = 0;  //定义纯虚函数
+};
+class Triangle :public Figure
+{
+public:
+	void show_area()const
+	{
+		cout << "Triangle with high" << x << " and base " << y;
+		cout << "has an area of " << x * 0.5 * y << endl;
+	}
+};
+class Square :public Figure
+{
+public:
+	void show_area()const
+	{
+		cout << "Square with dimension " << x << "*" << y;
+		cout << "has an area of " << x * y << endl;
+	}
+};
+class Circle :public Figure
+{
+public:
+	void show_area()const
+	{
+		cout << "Circle with radius " << x;
+		cout << "has an area of" << 3.14 * x * x << endl;
+	}
+};
+int main()
+{
+	Figure* p;
+	Triangle t;
+	Square s;
+	Circle c;
+	p = &t;
+	p->set_dim(10.0, 5.0);
+	p->show_area();
+	p = &s;
+	p->set_dim(8.0, 6.0);
+	p->show_area();
+	p = &c;
+	p->set_dim(9.0);
+	p->show_area();
+	return 0;
+}
+```
+
+## 5.异质链表
+动态异质链表，需要在抽象类定义中增加一个公有数据成员，指针成员next
+```
+class Employee
+{
+public:
+    Employee(const long,const char *);
+    Employee *next;
+protected:
+    long number;
+	char name[20];
+}
+
+void AddFront(Employee *&h,Employee *&t)
+{                 //指针引用
+	t->next=h;
+	h=t;
+}
+
+void test3()
+{
+	Employee *empHead=NUll,*ptr;
+	ptr=new Manager(10135,"Cheng ming",1200);                 //建立第一个结点
+    AddFront(empHead,ptr);                                    //插入表头
+	ptr=new HourlyWorker(30712,"zhao xiaoming",2,8*20);       //建立第二个结点
+    AddFront(empHead,ptr);                                   //插入表头
+	ptr=new PieceWorker(20382,"Xiu luwei",0.5,2850);           //建立第三个结点
+    AddFront(empHead,ptr);                                     //插入表头
+	ptr=empHead;
+	while(ptr)
+	{                                                             //遍历链表
+		ptr->print();
+		ptr=ptr->next;
+	}
+	ptr=empHead;
+	while(ptr)
+	{
+		cout<<ptr->getName()<<" "<<ptr->earnings()<<endl;
+		ptr=ptr->next;
+	}
+}
+```

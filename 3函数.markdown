@@ -1,0 +1,363 @@
+##  1.值传递
+
+1. return 会有匿名对象储存返回结果，这个匿名对象再返回调用之后撤销。
+
+ 函数原型 double max(double,double);
+
+2. 如果实参类型和形参类型不同，则按形参的类型进行强制类型转换后赋给形参。
+```
+int max(double a,double b)
+{return (a>b?a:b);}
+
+m=max(5.2/2,0.5);
+//输出结果
+m=2;
+```
+   
+ 3. 默认参数 
+   ```
+   double dist(double,double,double =0,double =0);
+   ```
+   默认参数只能是最右边（尾数）的参数。
+
+   默认参数应该再函数名第一次出现时指定，后面函数定义不用重复给出
+
+   默认值可以是常量、全局变量或函数调用，但不能是局部变量。
+
+   可以用于内联函数。
+
+   ## 2. 指针传递（地址调用）
+   1. 改变实参
+   ```
+   void swap(int *a,int *b)
+   {
+    int temp=*a;
+    *a=*b;
+    *b=temp;
+   }
+
+   swap(&x,&y);
+   ```
+   传递常对象的地址,形参用const约束
+   ```
+   int func(const int *p);
+
+   const int m=10;
+   cout<<func(&m)<<endl;
+   ```
+## 3.引用参数
+形参不需要开辟新的存储空间,改变实参
+```
+void swap(int &a,int &b)
+{
+    int temp=a;a=b;b=temp;
+}
+
+swap（a,b);
+```
+const限定引用
+```
+void display(const int &rk);
+
+int main()
+{
+    const int m=10;
+    display(m);          
+    display(m+10);
+    display(4549);               //实参是常量
+}
+```
+只有const引用对应的实参可以是常量或表达式，非约束的引用参数对应的实参必须是对象名。
+
+# 二、函数的返回类型
+## 1.返回基本类型
+```
+int function(int x)
+{
+    ……
+    return x;
+}
+```
+## 2.返回指针类型
+指针函数，返回一个对象的地址表达式
+
+int <font color=red>*</font> maxpoint(int *x,int *y);
+```
+int *maxpoint(int *x,int *y)
+{
+    if(*x>*y)return x;
+    return y;
+}
+
+main函数中
+cout<<*maxpoint(&a,&b)<<endl; 
+//注意 * 间址访问，因为maxpoint返回一个地址
+```
+使用指针函数可以节省匿名对象造成的时空消耗
+
+指针函数不能返回局部变量的指针
+## 3.返回引用类型
+int <font color=red>&</font> maxreff(int &x,int &y);
+```
+int & maxreff(int &x,int &y)
+{
+    if(x>y)return x;
+    return y;
+}
+
+cout<<maxreff(a,b)<<endl;
+```
+
+# 三、函数调用
+### 1. 嵌套调用
+   
+main函数由操作系统调用
+
+函数调用信息管理堆栈
+
+### 2. 递归调用
+
+递推和回归
+
+构成递归函数的两个基本要素：
+（1）描述问题规模逐步减小的递归算法
+
+（2）描述基本情况的递归终止条件
+
+1. 求正整数a,b的最大公约数
+   ```
+   // 默认（a>b)
+   int gcd(int a,int b)
+   {
+    return ( a%b ? gcd( b ,a % b): b);
+   }
+
+   //求a,b,c的公约数
+   int num=gcd(gcd(a,b),gcd(b,c));
+   ```
+2. 逆序输出
+   ```
+   void reverse()
+   {
+    char c;
+    cin>>ch;
+    if(ch!='.')
+    {
+        reverse();
+    }
+    cout<<ch;
+   }
+   ```
+   巧妙利用堆栈
+
+   输入 abcd.
+
+   输出 .dcba 
+3. 斐波那契数列
+   0 , 1 , 1 , 2 , 3 , 5
+
+   Fibonacci(0)=0;
+
+   Fibonacci(1)=1;
+
+   Fibonacci(n)=Fibonacci(n-1)+Fibonacci(n-2);
+   ```
+   int Fibonacci(int n)
+   {
+    if(n==0 || n==1 )return n;
+    else return (Fibonacci(n-1)+Fibonacci(n-2));
+   }
+   ```
+ 4. 汉诺塔问题
+```
+   void move(int n, char a, char b, char c)
+    {
+	if(n==1){ cout << a << "->" << c << endl; }
+	else
+	{
+		move(n - 1, a, c, b);
+		cout << a << "->" << c << endl;
+		move(n - 1, b, a, c);
+	}
+    }
+```
+
+# 四、函数地址与函数指针
+ 1. 函数名、函数地址都是函数的入口地址
+   ```
+   simple
+   &simple
+   *&simple 
+   ```
+   函数调用，后两种方式中括号不能省略
+   ```
+   simple();
+   (&simple)();
+   (*&simple)();
+   ```
+## 2. 函数的类型
+   
+   1. 函数类型指的是函数的接口，包括函数的参数定义和返回类型
+
+      double (double,double)
+      
+      ```
+      double max(double,double);
+      double min(double,double);
+      double average(double,double);
+      //三个都是一样的函数类型
+      ```
+
+2. 用typedef来命名函数类型
+
+    typedef 类型 函数类型名 （形参表）
+    ```
+    typedef double functiontype (double,double);
+
+    functiontype max,min,average;
+    ```
+    typedef可以用于定义标准类型的别名
+
+    typedef int integer;
+
+    integer 就是int的别名
+
+    typedef long long LL；
+    //把long long替换成LL节约录入时间
+3. 函数指针
+   ```
+   double (*fp)(double,double);
+
+   typedef double (*ftype) (double,double);
+   或者 typedef functiontype *ftype;
+
+   ftype f1,f2;
+   f1=max;         //指向函数max
+   f2=min;         //指向函数Min
+   ```
+   用函数指针调用函数
+   ```
+   fp=max;
+   x=fp(0.5,3.92);
+
+   //从函数的调用性质可知，（*fp）（0.5，3.92）与fp(0.5,3.92)是等价的调用方式。但是（&fp）（0.5，3.92）就是错误的，fp是指针变量，它的地址不是函数的地址，它的值才是。
+   ```
+   ```
+   #include<iostream>
+   using namespace std;
+   typedef double funtype(double);
+   function circlePerimeter,circleArea;
+   double callFun(funtype*,double);
+   int main()
+   {
+    double r;
+    cin>>r;
+    //用函数地址作为实参调用函数callfun
+   cout<<"the perimeter of circle is :"<<callFun(circlePerimeter,r)<<endl;
+   cout<<"the area of circle is :"<<callFun(circleArea,r)<<endl;
+   }
+   const double PI=3.14159;
+   double circlePerimeter(double r)
+    { return 2*PI*r;}
+    double circleArea(double r)
+    { return PI*r*r;}
+    double callFun(funtype * fp,double r)
+    { return fp(r);}
+   ```
+## 五、内联函数
+函数调用都需要建立堆栈空间来保存调用时的现场状态和返回地址
+
+函数定义时前面加inline ，后面不能重复给出
+
+内联函数 1-5行小程序，不能有递归
+```
+inline int isnumber(char);
+int main()
+{
+    ……
+}
+int isnumber(char c)
+{
+    return ch>='0' && ch<='9' ? 1 : 0;
+}
+```
+## 重载函数
+函数参数表（参数类型和个数）
+```
+//参数类型相同，个数不同
+int max(int ,int);
+int max(int ,int ,int);
+
+//参数类型不同，个数相同
+int abs(int a);
+double abs(double a);
+
+//返回类型无关,如下面两个不是重载函数
+int max(int ,int );
+double max(int ,int);
+```
+重载函数中使用默认参数可能产生二义性
+
+---
+## 六、变量存储特性和标识符作用域
+1. 自动存储 auto 和 register ，默认状态
+2. 静态存储
+   
+   全局说明的标识符默认为extern
+
+   static说明的局部变量只能在定义该变量的函数体中使用，默认初始化为0，系统退出后保持其存储空间和数值。
+
+   static int b; //静态变量，再次调用保留原值
+
+   如可以用来计算次数，递归算次数
+
+ *eg。测试密码输入，本程序使用静态变量记录用户输入密码的次数，若连续三次输入错误则显示错误信息，并结束程序。*
+```
+#include<iostream>
+using namespace std;
+int password(const int&);
+int main()
+{
+	if (password(123456))cout << "Welcome." << endl;
+	else cout << "Sorry,you are wrong." << endl;
+	return  0;
+}
+int password(const int& key)
+{
+	static int n = 0;
+	cout << "Please input the password.\n";
+	int k;
+	cin >> k;
+	n++;
+	if (n < 3)
+	{
+		if (k == key)return 1;
+		password(key);      //递归，重新输入
+	}
+	else                    //连续输入三次错误
+	{
+		if (k != key)return 0;
+	}
+}
+```
+1. 具有文件作用域的变量称为 全局变量，具有块作用域的称为局部变量。
+2. 块作用域 是由花括号 { }
+3. 函数作用域 
+   
+    语句标号 “ ：”（后面带冒号的标识符）是唯一具有函数作用域的标识符。语句标号一般用于switch结构中的case标号，以及goto 语句转向入口的语句标号。标号可以在函数体中任何地方使用，不能再函数体外使用。
+4. 文件作用域 
+   
+   任何在函数之外说明的标识符都具有文件作用域。这种标识符对于从说明起到文件尾的任何函数都是可见的。
+5. 具有文件作用域的是全局变量，具有块作用域的是局部变量。
+6. 全局变量说明时默认初值为0，当局部变量和全局变量同名时，在块内，全局变量被屏蔽。在块内要访问全局变量，可以使用 作用域标识符“ ：： ”/
+7. 终止程序执行
+   1. abort函数  void abort(void)
+   2. assert函数 
+   ```
+   #include<cassert>
+
+   void assert(int expression);
+   ```
+   3. exit函数  这三个函数都会直接退出整个应用程序，通常用于处理系统的异常错误。
+
+          

@@ -1,0 +1,477 @@
+## 1. 定义类与对象
+   
+|  | |
+| ---|---|
+|class |缺省说明时，其成员被认为是私有的|
+|struct|若不特别指出，其所有成员都是公有的 |
+|union|其所有成员都是公有的，且不能更改
+
+类由成员构成：
+1. 数据成员———描述对象的属性
+2. 成员函数———描述对象的方法
+   
+注：
+1. 允许已定义类出现在类的说明中
+```
+class link
+{
+   link *next;
+   ……
+};
+
+
+class X
+{
+     ……
+};
+class Y
+{
+    X datamenber;  //声明一个类类型的数据成员
+    ……
+}
+```
+2. 类可以无名，用于直接声明对象
+3. 类是一个程序包，可以只有数据成员或只有成员函数，或者为空
+   
+## 2.访问对象成员
+
+2.1 指针 动态存储
+```
+Date *pd =new (Date);
+pd->Setdate(2001,10,1);
+pd->print();
+delete pd;
+```
+```
+#include<iostream>
+using namespace std;
+class Tclass
+{
+public:
+	int x, y;
+	void out()
+	{
+		cout << x << " " << y << endl;
+	};
+};
+int add(Tclass* ptf)
+{
+	return (ptf->x + ptf->y);
+}
+int main()
+{
+	Tclass test, * pt = new(Tclass);
+	pt->x = 100; pt->y = 200;
+	pt->out();
+	cout << "x+y=" << add(pt) << endl;
+	test.x = 150; test.y = 450;
+	test.out();
+	cout << "x+y=" << add(&test);
+}
+```
+2.2 this指针
+
+成员函数拥有this指针,隐含指针，不能显示说明，但可以在成员函数中显示使用，this指针是一个常指针
+```
+Person & addage(Person p)
+{
+    this->age+=p.age;
+    return *this;
+}
+
+int main()
+{
+    ……
+    p2.addage(p1).addage(p1);
+    //链式思维
+}
+```
+## 3.构造函数与析构函数
+### 3.1 构造函数的初始化
+```
+Date :: Date(int y,int m,int d)
+{
+    year=y; month=m; day=d;
+}
+```
+```
+Date::Date(int y,int m,int d):year(y),month(m),day(d) {}
+```
+有时候只能使用第二种初始化，如下
+初始式 （参数初始化）的初始化：
+1. 类成员的初始化
+2. 派生类的初始化
+3. 常成员的初始化
+```
+#include<iostream>
+using namespace std;
+class A
+{
+public:
+	A(int x) :a(x) {}
+	int a;
+};
+class B
+{
+public:
+	B(int x,int y):aa(x),b(y){}
+	void out()
+	{
+		cout << "aa=" << aa.a << endl << "b=" << b << endl;
+	}
+private:
+	int b;
+	A aa;
+};
+int main()
+{
+	B objB(3, 5);
+	objB.out();
+	return 0;
+}
+
+```
+### 3.2重载构造函数
+```
+class X
+{
+    public:
+    X();
+    x(int);
+    X(int ,char);
+    X(double ,char);
+}
+
+void f()
+{
+    X a;
+    X b(1);
+    X c(1,'c');
+    X d(2.3,'d');
+}
+```
+
+### 3.3深拷贝和浅拷贝
+
+拷贝构造函数： 
+
+类名：：类名（const 类名 & 应用名 ）；
+
+深拷贝
+```
+#include<iostream>
+#include<cstring>
+using namespace std;
+class Name
+{
+public:
+	Name(const char* pn);
+	Name(const Name& oBj);
+	~Name();
+	void setName(const char*);
+	void showName();
+protected:
+	char* pName;
+	int size;
+};
+Name::Name(const char* pn)            //定义拷贝构造函数
+{
+	cout << "Constructing" << pn << endl;
+	pName = new char[strlen(pn) + 1];
+	if (pName != 0)strcpy_s(pName, strlen(pn) + 1, pn);
+	size = strlen(pn);
+}
+Name::Name(const Name& obj)
+{
+	cout << "Copying " << obj.pName << "into its own block\n";
+	pName = new char[strlen(obj.pName) + 1];
+	if (pName != 0)strcpy_s(pName, strlen(obj.pName) + 1, obj.pName);
+	size = obj.size;
+}
+Name::~Name()
+{
+	cout << "Destroying " << pName << endl;
+	pName[0] = '\0';
+	delete[]pName;
+	pName = NULL;
+	size = 0;
+}
+void Name::setName(const char* pn)
+{
+	delete[]pName;
+	pName = new char[strlen(pn) + 1];
+	if(pName!=0)strcpy_s(pName, strlen(pn) + 1, pn);
+	size = strlen(pn);
+}
+void Name::showName()
+{
+	cout << pName << endl;
+}
+int main()
+{
+	Name Obj1("noname");
+	Name Obj2 = Obj1;
+	Obj1.showName();
+	Obj2.showName();
+	Obj1.setName("sushi");
+	Obj2.setName("dufu");
+	Obj1.showName();
+	Obj2.showName();
+}
+```
+## 4. 常成员
+### 4.1 常数据成员
+
+const Person p;
+
+用参数初始式对常数据成员赋值
+```
+class Mclass
+{
+public:
+    int k;
+	const int M;
+	Mclass () M(5){}        //用参数初始式对常数据成员赋值
+};
+
+//不能在成员函数和类外修改常数据成员
+```
+用带参数构造函数完成数据成员初始化
+```
+Student::Student(int y,int m,int d,int num,char *pName):code(num)
+{
+	strcpy_s(name,pName);
+	name[sizeof(pName)-1]='\0';
+	birthday.year=y;
+	birthday.month=m;
+	birthday.day=d;
+}
+```
+### 4.2常对象
+常对象只能调用常函数
+```
+class Tclass
+{
+    public:
+	int x,y;
+	Tclass(int a,int b)
+	{
+		x=a,y=b;
+	}
+}；
+
+int main()
+{
+	const Tclass t1(1,2);  //常对象,不可修改其数据成员
+}
+```
+### 4.3常函数
+1. 成员函数后加const后称该函数为常函数
+2. 常函数不可以修改成员属性
+3. 成员属性声明时加关键字mutable，在常函数中依然可以修改
+```
+#include<iostream>
+using namespace std;
+class student
+{
+	int a;
+	int  mutable b;
+public:
+    student (int x,int y): a(x),b(y){}
+	void func1()
+	{
+		a++;
+		b++;
+		cout << a << " " << b << endl;
+	}
+	void func2()const
+	{
+	    //a++;错误，常函数不可以修改成员属性
+		b++;
+		cout << a << " " << b << endl;
+	}
+	
+};
+int main()
+{
+	student s(1, 2);
+	s.func1();
+	s.func2();
+
+}
+```
+## 5.静态成员
+### 5.1 静态数据成员
+
+1. 存储性质：全局变量  （同类对象的共享）
+
+ 2. 作用域是类，在类中的public,protected,private起约束访问作用
+
+ 3. 声明static数据成员static int num
+ 不会建立存储空间，需要在类声明外由static数据成员的说明语句，初始化 
+
+ （*类外定义并初始化*） int Counter::num=0;
+
+
+4. 访问 可以通过类名或者对象访问
+Counter::Num; 或 c.Num;
+
+```
+#include<iostream>
+using namespace std;
+class student
+{
+public:
+	static int snum;        
+	int num;
+	student(int b) :num(b){}
+};
+int student:: snum = 0;         //类外定义并初始化
+int main()
+{
+	student s(2);
+	for (int i = 0; i < 5; i++)
+	{
+		student::snum += i;
+		cout << student::snum << '\t';   //通过类名访问
+	}
+	cout << endl;
+	cout << "s.snum=" << s.snum << endl;      //通过对象访问
+	cout << "s.num=" << s.num << endl;         //通过对象访问
+	return 0;
+}
+```
+### 5.2静态成员函数
+没有this指针，静态成员函数只能访问类的静态数据成员
+
+类外访问 ，可以用“类名：：” 作为限定词，或通过对象调用
+
+
+```
+class X
+{
+public:
+    static void stafun(int i,X*ptr);
+	int stadat;
+}
+void X::stafun(int i,X *ptr)
+{
+	ptr->stadat=i;         //通过参数访问数据成员
+}
+int main()
+{
+	X obj;
+	X::stafun();      //通过类名访问
+	obj.stafun();    //通过对象访问
+}
+```
+购买货物
+```
+#include<iostream>
+using namespace std;
+class goods
+{
+private:
+	int weight;
+	static int total_weight;
+public:
+	goods(int w)
+	{
+		weight = w;
+		total_weight += w;
+	}
+	goods* next;
+	~goods()
+	{
+		total_weight -= weight;
+	}
+	int Weight()
+	{
+		return weight;
+	}
+	static int Totalweight()
+	{
+		return total_weight;
+	}
+};
+int goods::total_weight = 0;
+void purchase(goods* & f,goods*&r,int w)
+{
+	goods* t=new goods(w);
+	t->next = NULL;
+	if (f == NULL)f =r= t;
+	else
+	{
+		r->next = t;
+		r = r->next;
+	}
+}
+void sale(goods* &f, goods* &r)
+{
+	if (f == NULL)
+	{ cout << "No any goods now.\n"; 
+	return; }
+	goods* p = f;
+	f = f -> next;
+	delete p;
+	p = NULL;
+	cout << "sold\n";
+
+}
+int main()
+{
+	goods* front = NULL, * rear = NULL;
+	int w, choice;
+	do
+	{
+		cout << "Please choose\n";
+		cout << "Key in 1 is purchase,key in 2 is sale,key in 0 is over.\n";
+		cin >> choice;
+		switch (choice)
+		{
+		case 1:
+		{
+			cout << "Input weight:";
+			cin >> w;
+			purchase(front, rear, w);
+			break;
+		}
+		case 2:
+		{
+			sale(front, rear);
+			break;
+		}
+		case 0:
+			break;
+		}
+		cout << "Now total weight is " << goods::Totalweight() << endl;
+	} while (choice);
+}
+```
+## 6.友元
+1. 友元可以访问类的所有成员，包括私有成员，友元可以是一个普通函数，成员函数或一个类，友元关系是非对称的、非传递的。
+2. ### 友元函数
+   1. 友元函数不受private,public,protected的影响，友元函数不是类的成员，仅作友元声明
+   ```
+   class A
+   {
+	private:
+	    int i;
+		void MemberFun(int);
+		friend void FriendFun(A*ptr,int);
+   }
+   void Friendfun(A*ptr,int a)
+   {
+	     ptr->i=a;          //友元函数通过参数访问类的私有成员
+   }
+   void MemberFun(int x)
+   {
+	     this->i=x;       //成员函数通过this指针访问类的私有成员
+   }
+   ```
+   2. 友元函数必须在参数表中显示指明要访问的对象
+    ```
+   A Aobj;
+   FriendFun(&obj,5);
+   Member(5);
+   ```

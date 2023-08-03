@@ -1,0 +1,335 @@
+# 线性表
+![线性表定义](image/线性表定义.png)
+```
+typedef struct LNode* List;
+struct LNode{
+    ElementType Data[MAXSIZE];
+    int last;
+};
+struct LNode L;
+List PtrL;
+```
+顺序存储
+# 1. 数组
+### 1. 初始化（建立空的顺序表）
+```
+List MakeEmpty()
+{
+    List PtrL;
+    Ptrl=new LNode;
+    Ptrl->last=-1;
+    return PtrL;
+}
+```
+### 2. 查找
+```
+int Find(ElementType X,List PtrL)
+{
+    int i=0;
+    while(i<= PtrL->last && PtrL->Date[i]!=X)
+        i++;
+    if(i>PtrL->last)return -1; //如果没找到，返回-1
+    else return i;//找到后返回的是存储的位置
+}
+```
+### 3. 增添
+
+初始条件：顺序线性表L已经存在 1<=i <=last+1
+
+操作结果：在L中第i个位置之前插入新的数据元素X,L的长度加一
+```
+void Insert(ElementType X,int i,List PtrL)
+{
+    if(PtrL->last==MAXSIZE-1)
+    {
+        cout<<"表满"<<endl;
+        return;
+    }
+    if(i<1 || i>PtrL->last+2)
+    {
+        cout<<"位置不合法”<<endl;return;
+    }
+    for(int j=PtrL->last+1;j>=i;j--)
+        PtrL->Data[j]=PtrL->Data[j-1];
+        //将元素后移
+    PtrL->Data[i-1]=X;      //新元素插入
+    PtrL->last++;  //last仍指向最后元素
+}
+```
+
+### 4. 删除操作实现
+```
+void Delete(int i,List PtrL)
+{
+    if(i<1||i>PtrL->Last+1)
+    {
+        cout<<"不存在第"<<i<<"个元素"<<endl;
+    }
+    for(int j=i;j<=PtrL->last;j++)
+    {
+        PtrL->Data[j-1]=PtrL->Data[j];
+    }  //将元素前移
+    PtrL->last--;
+    return;
+}
+```
+线性表顺序存储结构的优缺点：
+1. 优点
+    1. 无须为表示表中元素之间的逻辑关系而增加额外的存储空间
+    2. 可以快速存取表中任一位置的元素
+2. 缺点
+    1. 插入和删除操作需要移动大量元素
+    2. 当线性表长度变化较大时，难以确定存储空间的容量
+    3. 造成存储空间的“碎片”
+
+
+# 2. 链表
+链式存储结构
+```
+typedef struct LNode *List;
+struct LNode
+{
+    ElementType Data;
+    List next;
+};
+LNode L;
+List PtrL;
+```
+### 0. 求表长
+```
+int Length(List PtrL)
+{
+    int j=0;
+    List p=Ptrl;
+    while(p)
+    {
+        p=p->next;
+        j++;
+    }
+    return j;
+}
+```
+### 1. 初始化链表
+```
+void Create_after(node* &head)  //使用指针的引用参数
+{
+	node* s, * p;
+	s = new node;
+	cin >> s->data;
+	s->next = NULL;
+	while (s->data!=0)
+	{
+		if (head == NULL)        //记得是==
+			head = s;
+		else p->next = s;
+		p = s;
+		s = new node;
+		cin >> s->data;
+	}
+	p->next = NULL;
+	delete s;
+	return;
+}
+
+```
+单链表的整表删除
+```
+void DeleteList(node *&head)
+{
+    node *p,*q;
+    p=head->next;
+    while(p)       //没到表尾
+    {
+        q=p->next;
+        delete p;
+        p=q;
+    }
+    //头结点指针域为空
+    head->next=NULL;
+    return;
+}
+```
+### 2. 查找
+2.1 按顺序查找FindKth
+```
+List FindKth(int K,List head)
+{
+    List p=head;
+    int i=1;
+    while(p!=NULL && i<K)
+    {
+        p=p->next;
+        i++;
+    }
+    if(i==K)return p;
+    else return NULL;
+}
+```
+2.2 按值查找Find
+```
+List Find(ElementType X,List head)
+{
+    List p=head;
+    while(p!=NULL && p->data!=X)
+    {
+        p=p->next;
+    }
+    return p;
+}
+```
+### 3. 增添
+```
+List Insert(ElementType X,int i,List head)            //i代表插入为第几个
+{
+    List p,s;
+    if(i==1)
+    { //插入表头
+        s=new LNode;
+        s->data=X;
+        s->next=head;
+        return s;
+    }
+    p=FindKth(i-1,head); //查找第i-1个结点
+    if(p==NULL)
+    {
+        cout<<"参数i错"<<endl;
+        Return NULL;
+    }
+    else
+    { //插入到第i-1个结点后面
+        s=new LNode;
+        s->data=X;
+        s->next=p->next;
+        p->next=s;
+        return s;
+    }
+}
+```
+### 4. 删除
+
+删除结点也要根据结点的位置进行不同处理，还要注意  *释放被删结点*。
+### （1）删除头节点
+```
+node *p;
+p=head;
+head=head->next;
+delete p;
+```
+### (2) 删除*p
+q为p的前驱结点
+```
+q->next=p->next;
+delete p;
+```
+### eg.从链表中删除等于key的结点
+```
+void del(node*& head,int key)
+{
+	if (!head)
+	{
+		cout << "List null!\n"; return;
+	}
+	if (key == head->data)
+	{
+		node* s;
+		s = head;
+		head = head->next;
+		delete s; s = NULL; 
+		return;
+	}
+	node* p, * q;
+	for (p = head->next, q = head; p; q = p, p = p->next)
+	{
+		if (p->data == key)
+		{
+			q->next = p->next;
+			delete p; p = NULL;
+			return;
+		}
+	}
+		cout << "There is no key : " << key << endl;
+}
+```
+单链表结构与顺序存储结构的优缺点
+1. 时间性能
+    1. 查找
+        * 顺序存储结构O(1)
+        * 单链表O(n)
+    2. 插入和删除
+        * 顺序存储结构需要平均移动表长一半的元素，时间O(N)
+        * 单链表在找出某位置的指针后，插入和删除时间为O(1)
+2. 空间性能
+    * 顺序结构需要预分配存储空间，分大了，浪费，分小了，容易上溢
+    * 单链表不需要分配存储空间，只要有就可以分配，元素个数也不受限制
+
+线性表:频繁查找，很少进行插入和删除操作
+
+顺序存储：增加删除多
+# 
+## 1. 静态链表
+## 2. 循环链表
+![](image/QQ%E5%9B%BE%E7%89%8720230801174738.png)
+为了查找开始节点和终端结点都方便
+![](image/QQ%E5%9B%BE%E7%89%8720230801174733.png)
+```
+尾指针rear
+头节点为rear->next
+第一个结点为rear->next->next
+```
+将两条循环链表合并成一条表，有尾指针方便
+![](image/QQ%E5%9B%BE%E7%89%8720230801174712.png)
+```
+p=rearA->next;       //保存A表的头节点
+rearA->next=rearB->next->next;     
+ //将本是指向B表的第一个结点（不是头节点）赋值给rearA->next
+q=rearB->next;
+rearB->next=p;
+delete q; //释放q
+```
+## 3. 双向链表
+线性表的双向链表存储结构
+```
+struct DulNode
+{
+    ElemType data;
+    DulNode *prior;   //前驱指针
+    DulNode *next;   // 后继指针
+};
+```
+![](image/QQ%E5%9B%BE%E7%89%8720230801181422.png)
+### 插入操作：
+
+顺序很重要，先搞定s的前驱和后继，再搞定后结点的前驱，最后解决前结点的后继。
+![](image/QQ%E5%9B%BE%E7%89%8720230801181440.png)
+```
+s->prior=p;        //s的前驱
+s->next=p->next;       //s的后继
+p->next->prior=s;     //后结点的前驱
+p->next=s;         //前结点的后继
+```
+### 删除
+![](image/QQ%E5%9B%BE%E7%89%8720230801181447.png)
+```
+p->prior->next=p->next;        
+p->next->prior=p->prior;
+delete p;        //释放结点
+```
+# 3. 广义表
+![广义表](image/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202023-07-28%20222546.png)
+![](image/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202023-07-28%20222659.png)
+```
+typedef struct GNode *GList;
+struct GNode
+{
+    int Tag;     //标志域，0表示结点是单元素，1表示结点是广义表
+    union
+    {           
+        ElementType Data;
+        GList Sublist;
+    }URegion;
+    GList next;  //指向后继结点
+}
+```
+![](image/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202023-07-28%20222945.png)
+![](image/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202023-07-28%20223059.png)
+![](image/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202023-07-28%20223234.png)
